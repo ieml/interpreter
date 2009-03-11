@@ -1,0 +1,26 @@
+<project default="jar" basedir="." name="palacehotel avatar">
+	
+	<path id="libpath">
+		<fileset dir="lib">
+			<include name="compile/*.jar"/>
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="build" failonerror="no"/>
+		<delete dir="dist" failonerror="no"/>
+	</target>
+	
+	<target name="compile">
+    <mkdir dir="build/classes"/>
+		<javac destdir="build/classes" srcdir="src" deprecation="on" debug="true" classpathref="libpath"/>
+	</target>
+	
+	<target name="jar" depends="compile">
+		<jar jarfile="ieml.jar">
+			<fileset dir="build/classes"/>
+		</jar>
+	</target>
+	
+</project>
