@@ -35,6 +35,10 @@ public class Interpreter {
     	printTree(ast, 0);
     }
     
+    public static void unfold() {
+    	
+    }
+    
     public static void toXML(CommonTree ast, String input) {
     	Document document = DocumentHelper.createDocument();
     	Element root = DocumentHelper.createElement("ieml");
