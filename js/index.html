@@ -1,0 +1,80 @@
+<html>
+<head>
+	<script language="JavaScript" src="jsunit/app/jsUnitCore.js"></script>
+	<script type="text/javascript" src="lib/antlr3-all-min.js"></script>
+	<script type="text/javascript" src="lib/ieml.js"></script>
+	<script type="text/javascript" src="iemlLexer.js"></script>
+	<script type="text/javascript" src="iemlParser.js"></script>
+	<script type="text/javascript" src="iemlWalker.js"></script>
+	<script>
+		// this is to test the combine function as is (independently of IEML stuff)
+		function testCombine() {
+			var input = ["A","B","C"];
+			var result = combine(input);
+			debug(result);
+			assert("we don't have 7 results", result.length==7);
+		}
+
+		// a first simple expression
+		function testStar1() {
+			var star1 = parseStar("*S:B:T:.**");
+			var expected = "*S:B:T:.**";
+			var result = star1.toString()==expected;
+			assert("star isn't properly parsed: "
+					+ star1.toString()
+					+ " (expected: " + expected + ")",
+					result);
+		}
+
+		// a bit more complicated
+		function testStar3() {
+			var star = parseStar("*wa.k.-E:.-A:.y.-'s.a.-l.a.-f.o.-'s.o.-d.o.-',**");
+			var expected = "*wa.k.-E:.-A:.y.-'s.a.-l.a.-f.o.-'s.o.-d.o.-',**";
+			var result = star.toString()==expected;
+			assert("star isn't properly parsed: "
+					+ star.toString()
+					+ " (expected: " + expected + ")",
+					result);
+		}
+
+		// really basic
+		function testStar4() {
+			var star = parseStar("*O:**");
+			var expected = "*O:**";
+			var result = star.toString()==expected;
+			assert("star isn't properly parsed: "
+					+ star.toString()
+					+ " (expected: " + expected + ")",
+					result);
+		}
+
+		// invokes the parser
+		function parseStar(expr) {
+		    cstream = new org.antlr.runtime.ANTLRStringStream(expr),
+		    lexer = new iemlLexer(cstream),
+		    tstream = new org.antlr.runtime.CommonTokenStream(lexer),
+		    parser = new iemlParser(tstream),
+		    r = parser.script();
+		
+			var nodes = new org.antlr.runtime.tree.CommonTreeNodeStream(r.getTree());
+			nodes.setTokenStream(tstream);
+			var walker = new iemlWalker(nodes);
+			var scriptResult = walker.script();
+			return scriptResult;
+		}
+
+		// test the layer cardinalities on 3 star expressions
+		function testCategoryLayers() {
+			var star1 = parseStar("*S:B:T:.**");
+			var star2 = parseStar("*wa.k.-E:.-A:.y.-'s.a.-l.a.-f.o.-'s.o.-d.o.-',**");
+			var star3 = parseStar("*M:**");
+			assert(star1.toString() + " is of layer 1 (was " + star1.layer + ")", star1.layer==1);
+			assert(star2.toString() + " is of layer 4 (was " + star2.layer + ")", star2.layer==4);
+			assert(star3.toString() + " is of layer 0 (was " + star3.layer + ")", star3.layer==0);
+		}
+		
+	</script>
+</head>
+<body>
+</body>
+</html>

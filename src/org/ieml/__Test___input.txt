@@ -1,1 +1,1 @@
-xml * s.o.-a.a.-' **
+print(*S:B:T:.**)

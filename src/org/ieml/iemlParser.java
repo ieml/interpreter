@@ -1,4 +1,4 @@
-// $ANTLR 3.1.2 /eclipse/workspace/imelpreter/src/ieml.g 2009-03-14 15:44:52
+// $ANTLR 3.1.2 /eclipse/workspace/imelpreter/src/ieml.g 2009-03-18 11:50:15
 
 package org.ieml;
 
@@ -8,10 +8,12 @@ import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.runtime.debug.*;
+import java.io.IOException;
 
 import org.antlr.runtime.tree.*;
 
-public class iemlParser extends Parser {
+public class iemlParser extends DebugParser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "EXPRESSION", "SCRIPT", "PRINTSTAT", "XMLSTAT", "FUNCTION", "CAT0", "CAT1", "CAT2", "CAT3", "CAT4", "CAT5", "PRIM", "NAME", "LPAREN", "RPAREN", "STAR", "PRIMITIVE", "L0LM", "EVENT", "L1LM", "L2LM", "L3LM", "L4LM", "L5LM", "POR", "WS", "LETTER", "DIGIT", "LOWER", "UPPER"
     };
@@ -50,23 +52,56 @@ public class iemlParser extends Parser {
     // delegates
     // delegators
 
-
+    public static final String[] ruleNames = new String[] {
+        "invalidRule", "cat2", "cat1", "cat5", "cat4", "starexpr", "pop", 
+        "cat0", "expr", "functionEval", "cat3", "script"
+    };
+     
+        public int ruleLevel = 0;
+        public int getRuleLevel() { return ruleLevel; }
+        public void incRuleLevel() { ruleLevel++; }
+        public void decRuleLevel() { ruleLevel--; }
         public iemlParser(TokenStream input) {
-            this(input, new RecognizerSharedState());
+            this(input, DebugEventSocketProxy.DEFAULT_DEBUGGER_PORT, new RecognizerSharedState());
         }
-        public iemlParser(TokenStream input, RecognizerSharedState state) {
+        public iemlParser(TokenStream input, int port, RecognizerSharedState state) {
             super(input, state);
-             
+            DebugEventSocketProxy proxy =
+                new DebugEventSocketProxy(this,port,adaptor);
+            setDebugListener(proxy);
+            setTokenStream(new DebugTokenStream(input,proxy));
+            try {
+                proxy.handshake();
+            }
+            catch (IOException ioe) {
+                reportError(ioe);
+            }
+            TreeAdaptor adap = new CommonTreeAdaptor();
+            setTreeAdaptor(adap);
+            proxy.setTreeAdaptor(adap);
         }
-        
-    protected TreeAdaptor adaptor = new CommonTreeAdaptor();
+    public iemlParser(TokenStream input, DebugEventListener dbg) {
+        super(input, dbg);
 
+         
+        TreeAdaptor adap = new CommonTreeAdaptor();
+        setTreeAdaptor(adap);
+
+    }
+    protected boolean evalPredicate(boolean result, String predicate) {
+        dbg.semanticPredicate(result, predicate);
+        return result;
+    }
+
+    protected DebugTreeAdaptor adaptor;
     public void setTreeAdaptor(TreeAdaptor adaptor) {
-        this.adaptor = adaptor;
+        this.adaptor = new DebugTreeAdaptor(dbg,adaptor);
+
     }
     public TreeAdaptor getTreeAdaptor() {
         return adaptor;
     }
+
 
     public String[] getTokenNames() { return iemlParser.tokenNames; }
     public String getGrammarFileName() { return "/eclipse/workspace/imelpreter/src/ieml.g"; }
@@ -93,18 +128,27 @@ public class iemlParser extends Parser {
 
         CommonTree EOF2_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "script");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(26, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:26:8: ( functionEval EOF )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:26:10: functionEval EOF
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(26,10);
             pushFollow(FOLLOW_functionEval_in_script91);
             functionEval1=functionEval();
 
             state._fsp--;
 
             adaptor.addChild(root_0, functionEval1.getTree());
+            dbg.location(26,23);
             EOF2=(Token)match(input,EOF,FOLLOW_EOF_in_script93); 
             EOF2_tree = (CommonTree)adaptor.create(EOF2);
             adaptor.addChild(root_0, EOF2_tree);
@@ -126,6 +170,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(26, 26);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "script");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "script"
@@ -159,18 +212,31 @@ public class iemlParser extends Parser {
         RewriteRuleTokenStream stream_NAME=new RewriteRuleTokenStream(adaptor,"token NAME");
         RewriteRuleSubtreeStream stream_starexpr=new RewriteRuleSubtreeStream(adaptor,"rule starexpr");
         RewriteRuleSubtreeStream stream_functionEval=new RewriteRuleSubtreeStream(adaptor,"rule functionEval");
+        try { dbg.enterRule(getGrammarFileName(), "functionEval");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(28, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:29:3: (fn= NAME LPAREN (exp= starexpr | otherfn= functionEval ) RPAREN -> ^( FUNCTION $fn ( $exp)? ( $otherfn)? ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:29:5: fn= NAME LPAREN (exp= starexpr | otherfn= functionEval ) RPAREN
             {
+            dbg.location(29,7);
             fn=(Token)match(input,NAME,FOLLOW_NAME_in_functionEval105);  
             stream_NAME.add(fn);
 
+            dbg.location(29,13);
             LPAREN3=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_functionEval107);  
             stream_LPAREN.add(LPAREN3);
 
+            dbg.location(29,20);
             // /eclipse/workspace/imelpreter/src/ieml.g:29:20: (exp= starexpr | otherfn= functionEval )
             int alt1=2;
+            try { dbg.enterSubRule(1);
+            try { dbg.enterDecision(1);
+
             int LA1_0 = input.LA(1);
 
             if ( (LA1_0==STAR) ) {
@@ -183,12 +249,18 @@ public class iemlParser extends Parser {
                 NoViableAltException nvae =
                     new NoViableAltException("", 1, 0, input);
 
+                dbg.recognitionException(nvae);
                 throw nvae;
             }
+            } finally {dbg.exitDecision(1);}
+
             switch (alt1) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:29:21: exp= starexpr
                     {
+                    dbg.location(29,24);
                     pushFollow(FOLLOW_starexpr_in_functionEval112);
                     exp=starexpr();
 
@@ -199,8 +271,11 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 2 :
+                    dbg.enterAlt(2);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:29:36: otherfn= functionEval
                     {
+                    dbg.location(29,43);
                     pushFollow(FOLLOW_functionEval_in_functionEval118);
                     otherfn=functionEval();
 
@@ -212,14 +287,16 @@ public class iemlParser extends Parser {
                     break;
 
             }
+            } finally {dbg.exitSubRule(1);}
 
+            dbg.location(29,58);
             RPAREN4=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_functionEval121);  
             stream_RPAREN.add(RPAREN4);
 
 
 
             // AST REWRITE
-            // elements: exp, fn, otherfn
+            // elements: otherfn, fn, exp
             // token labels: fn
             // rule labels: exp, otherfn, retval
             // token list labels: 
@@ -234,20 +311,27 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 29:65: -> ^( FUNCTION $fn ( $exp)? ( $otherfn)? )
             {
+                dbg.location(29,68);
                 // /eclipse/workspace/imelpreter/src/ieml.g:29:68: ^( FUNCTION $fn ( $exp)? ( $otherfn)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(29,70);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(FUNCTION, "FUNCTION"), root_1);
 
+                dbg.location(29,79);
                 adaptor.addChild(root_1, stream_fn.nextNode());
+                dbg.location(29,83);
                 // /eclipse/workspace/imelpreter/src/ieml.g:29:83: ( $exp)?
                 if ( stream_exp.hasNext() ) {
+                    dbg.location(29,83);
                     adaptor.addChild(root_1, stream_exp.nextTree());
 
                 }
                 stream_exp.reset();
+                dbg.location(29,89);
                 // /eclipse/workspace/imelpreter/src/ieml.g:29:89: ( $otherfn)?
                 if ( stream_otherfn.hasNext() ) {
+                    dbg.location(29,89);
                     adaptor.addChild(root_1, stream_otherfn.nextTree());
 
                 }
@@ -275,6 +359,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(29, 99);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "functionEval");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "functionEval"
@@ -303,22 +396,33 @@ public class iemlParser extends Parser {
         CommonTree STAR7_tree=null;
         RewriteRuleTokenStream stream_STAR=new RewriteRuleTokenStream(adaptor,"token STAR");
         RewriteRuleSubtreeStream stream_expr=new RewriteRuleSubtreeStream(adaptor,"rule expr");
+        try { dbg.enterRule(getGrammarFileName(), "starexpr");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(31, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:31:9: ( STAR category= expr STAR STAR -> ^( EXPRESSION $category) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:31:11: STAR category= expr STAR STAR
             {
+            dbg.location(31,11);
             STAR5=(Token)match(input,STAR,FOLLOW_STAR_in_starexpr145);  
             stream_STAR.add(STAR5);
 
+            dbg.location(31,24);
             pushFollow(FOLLOW_expr_in_starexpr149);
             category=expr();
 
             state._fsp--;
 
             stream_expr.add(category.getTree());
+            dbg.location(31,30);
             STAR6=(Token)match(input,STAR,FOLLOW_STAR_in_starexpr151);  
             stream_STAR.add(STAR6);
 
+            dbg.location(31,35);
             STAR7=(Token)match(input,STAR,FOLLOW_STAR_in_starexpr153);  
             stream_STAR.add(STAR7);
 
@@ -338,11 +442,14 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 31:40: -> ^( EXPRESSION $category)
             {
+                dbg.location(31,43);
                 // /eclipse/workspace/imelpreter/src/ieml.g:31:43: ^( EXPRESSION $category)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(31,45);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EXPRESSION, "EXPRESSION"), root_1);
 
+                dbg.location(31,56);
                 adaptor.addChild(root_1, stream_category.nextTree());
 
                 adaptor.addChild(root_0, root_1);
@@ -367,6 +474,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(31, 66);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "starexpr");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "starexpr"
@@ -398,16 +514,35 @@ public class iemlParser extends Parser {
 
 
 
+        try { dbg.enterRule(getGrammarFileName(), "expr");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(33, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:33:6: ( cat0 | cat1 | cat2 | cat3 | cat4 | cat5 )
             int alt2=6;
-            alt2 = dfa2.predict(input);
+            try { dbg.enterDecision(2);
+
+            try {
+                isCyclicDecision = true;
+                alt2 = dfa2.predict(input);
+            }
+            catch (NoViableAltException nvae) {
+                dbg.recognitionException(nvae);
+                throw nvae;
+            }
+            } finally {dbg.exitDecision(2);}
+
             switch (alt2) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:33:8: cat0
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(33,8);
                     pushFollow(FOLLOW_cat0_in_expr170);
                     cat08=cat0();
 
@@ -418,10 +553,13 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 2 :
+                    dbg.enterAlt(2);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:33:15: cat1
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(33,15);
                     pushFollow(FOLLOW_cat1_in_expr174);
                     cat19=cat1();
 
@@ -432,10 +570,13 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 3 :
+                    dbg.enterAlt(3);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:33:22: cat2
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(33,22);
                     pushFollow(FOLLOW_cat2_in_expr178);
                     cat210=cat2();
 
@@ -446,10 +587,13 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 4 :
+                    dbg.enterAlt(4);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:33:29: cat3
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(33,29);
                     pushFollow(FOLLOW_cat3_in_expr182);
                     cat311=cat3();
 
@@ -460,10 +604,13 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 5 :
+                    dbg.enterAlt(5);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:33:36: cat4
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(33,36);
                     pushFollow(FOLLOW_cat4_in_expr186);
                     cat412=cat4();
 
@@ -474,10 +621,13 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 6 :
+                    dbg.enterAlt(6);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:33:43: cat5
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(33,43);
                     pushFollow(FOLLOW_cat5_in_expr190);
                     cat513=cat5();
 
@@ -503,6 +653,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(33, 47);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "expr");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "expr"
@@ -528,13 +687,22 @@ public class iemlParser extends Parser {
         RewriteRuleTokenStream stream_PRIMITIVE=new RewriteRuleTokenStream(adaptor,"token PRIMITIVE");
         RewriteRuleTokenStream stream_L0LM=new RewriteRuleTokenStream(adaptor,"token L0LM");
 
+        try { dbg.enterRule(getGrammarFileName(), "cat0");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(35, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:35:6: ( PRIMITIVE L0LM -> ^( CAT0 PRIMITIVE ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:35:8: PRIMITIVE L0LM
             {
+            dbg.location(35,8);
             PRIMITIVE14=(Token)match(input,PRIMITIVE,FOLLOW_PRIMITIVE_in_cat0198);  
             stream_PRIMITIVE.add(PRIMITIVE14);
 
+            dbg.location(35,18);
             L0LM15=(Token)match(input,L0LM,FOLLOW_L0LM_in_cat0200);  
             stream_L0LM.add(L0LM15);
 
@@ -553,11 +721,14 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 35:23: -> ^( CAT0 PRIMITIVE )
             {
+                dbg.location(35,26);
                 // /eclipse/workspace/imelpreter/src/ieml.g:35:26: ^( CAT0 PRIMITIVE )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(35,28);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CAT0, "CAT0"), root_1);
 
+                dbg.location(35,33);
                 adaptor.addChild(root_1, stream_PRIMITIVE.nextNode());
 
                 adaptor.addChild(root_0, root_1);
@@ -582,6 +753,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(35, 43);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "cat0");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "cat0"
@@ -613,12 +793,23 @@ public class iemlParser extends Parser {
         RewriteRuleTokenStream stream_EVENT=new RewriteRuleTokenStream(adaptor,"token EVENT");
         RewriteRuleTokenStream stream_L1LM=new RewriteRuleTokenStream(adaptor,"token L1LM");
         RewriteRuleSubtreeStream stream_cat0=new RewriteRuleSubtreeStream(adaptor,"rule cat0");
+        try { dbg.enterRule(getGrammarFileName(), "cat1");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(36, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:36:6: ( ( (first= cat0 (second= cat0 (third= cat0 )? )? ) | EVENT ) L1LM -> ^( CAT1 ( $first)? ( $second)? ( $third)? ( EVENT )? ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:36:8: ( (first= cat0 (second= cat0 (third= cat0 )? )? ) | EVENT ) L1LM
             {
+            dbg.location(36,8);
             // /eclipse/workspace/imelpreter/src/ieml.g:36:8: ( (first= cat0 (second= cat0 (third= cat0 )? )? ) | EVENT )
             int alt5=2;
+            try { dbg.enterSubRule(5);
+            try { dbg.enterDecision(5);
+
             int LA5_0 = input.LA(1);
 
             if ( (LA5_0==PRIMITIVE) ) {
@@ -631,49 +822,76 @@ public class iemlParser extends Parser {
                 NoViableAltException nvae =
                     new NoViableAltException("", 5, 0, input);
 
+                dbg.recognitionException(nvae);
                 throw nvae;
             }
+            } finally {dbg.exitDecision(5);}
+
             switch (alt5) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:36:9: (first= cat0 (second= cat0 (third= cat0 )? )? )
                     {
+                    dbg.location(36,9);
                     // /eclipse/workspace/imelpreter/src/ieml.g:36:9: (first= cat0 (second= cat0 (third= cat0 )? )? )
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:36:10: first= cat0 (second= cat0 (third= cat0 )? )?
                     {
+                    dbg.location(36,15);
                     pushFollow(FOLLOW_cat0_in_cat1219);
                     first=cat0();
 
                     state._fsp--;
 
                     stream_cat0.add(first.getTree());
+                    dbg.location(36,21);
                     // /eclipse/workspace/imelpreter/src/ieml.g:36:21: (second= cat0 (third= cat0 )? )?
                     int alt4=2;
+                    try { dbg.enterSubRule(4);
+                    try { dbg.enterDecision(4);
+
                     int LA4_0 = input.LA(1);
 
                     if ( (LA4_0==PRIMITIVE) ) {
                         alt4=1;
                     }
+                    } finally {dbg.exitDecision(4);}
+
                     switch (alt4) {
                         case 1 :
+                            dbg.enterAlt(1);
+
                             // /eclipse/workspace/imelpreter/src/ieml.g:36:22: second= cat0 (third= cat0 )?
                             {
+                            dbg.location(36,28);
                             pushFollow(FOLLOW_cat0_in_cat1224);
                             second=cat0();
 
                             state._fsp--;
 
                             stream_cat0.add(second.getTree());
+                            dbg.location(36,39);
                             // /eclipse/workspace/imelpreter/src/ieml.g:36:39: (third= cat0 )?
                             int alt3=2;
+                            try { dbg.enterSubRule(3);
+                            try { dbg.enterDecision(3);
+
                             int LA3_0 = input.LA(1);
 
                             if ( (LA3_0==PRIMITIVE) ) {
                                 alt3=1;
                             }
+                            } finally {dbg.exitDecision(3);}
+
                             switch (alt3) {
                                 case 1 :
+                                    dbg.enterAlt(1);
+
                                     // /eclipse/workspace/imelpreter/src/ieml.g:36:39: third= cat0
                                     {
+                                    dbg.location(36,39);
                                     pushFollow(FOLLOW_cat0_in_cat1228);
                                     third=cat0();
 
@@ -685,12 +903,14 @@ public class iemlParser extends Parser {
                                     break;
 
                             }
+                            } finally {dbg.exitSubRule(3);}
 
 
                             }
                             break;
 
                     }
+                    } finally {dbg.exitSubRule(4);}
 
 
                     }
@@ -699,8 +919,11 @@ public class iemlParser extends Parser {
                     }
                     break;
                 case 2 :
+                    dbg.enterAlt(2);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:36:51: EVENT
                     {
+                    dbg.location(36,51);
                     EVENT16=(Token)match(input,EVENT,FOLLOW_EVENT_in_cat1236);  
                     stream_EVENT.add(EVENT16);
 
@@ -709,14 +932,16 @@ public class iemlParser extends Parser {
                     break;
 
             }
+            } finally {dbg.exitSubRule(5);}
 
+            dbg.location(36,58);
             L1LM17=(Token)match(input,L1LM,FOLLOW_L1LM_in_cat1239);  
             stream_L1LM.add(L1LM17);
 
 
 
             // AST REWRITE
-            // elements: first, third, second, EVENT
+            // elements: second, first, EVENT, third
             // token labels: 
             // rule labels: first, retval, third, second
             // token list labels: 
@@ -731,31 +956,41 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 36:63: -> ^( CAT1 ( $first)? ( $second)? ( $third)? ( EVENT )? )
             {
+                dbg.location(36,66);
                 // /eclipse/workspace/imelpreter/src/ieml.g:36:66: ^( CAT1 ( $first)? ( $second)? ( $third)? ( EVENT )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(36,68);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CAT1, "CAT1"), root_1);
 
+                dbg.location(36,73);
                 // /eclipse/workspace/imelpreter/src/ieml.g:36:73: ( $first)?
                 if ( stream_first.hasNext() ) {
+                    dbg.location(36,73);
                     adaptor.addChild(root_1, stream_first.nextTree());
 
                 }
                 stream_first.reset();
+                dbg.location(36,81);
                 // /eclipse/workspace/imelpreter/src/ieml.g:36:81: ( $second)?
                 if ( stream_second.hasNext() ) {
+                    dbg.location(36,81);
                     adaptor.addChild(root_1, stream_second.nextTree());
 
                 }
                 stream_second.reset();
+                dbg.location(36,90);
                 // /eclipse/workspace/imelpreter/src/ieml.g:36:90: ( $third)?
                 if ( stream_third.hasNext() ) {
+                    dbg.location(36,90);
                     adaptor.addChild(root_1, stream_third.nextTree());
 
                 }
                 stream_third.reset();
+                dbg.location(36,98);
                 // /eclipse/workspace/imelpreter/src/ieml.g:36:98: ( EVENT )?
                 if ( stream_EVENT.hasNext() ) {
+                    dbg.location(36,98);
                     adaptor.addChild(root_1, stream_EVENT.nextNode());
 
                 }
@@ -783,6 +1018,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(36, 105);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "cat1");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "cat1"
@@ -811,44 +1055,70 @@ public class iemlParser extends Parser {
         CommonTree L2LM18_tree=null;
         RewriteRuleTokenStream stream_L2LM=new RewriteRuleTokenStream(adaptor,"token L2LM");
         RewriteRuleSubtreeStream stream_cat1=new RewriteRuleSubtreeStream(adaptor,"rule cat1");
+        try { dbg.enterRule(getGrammarFileName(), "cat2");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(37, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:37:6: (first= cat1 (second= cat1 (third= cat1 )? )? L2LM -> ^( CAT2 $first ( $second)? ( $third)? ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:37:8: first= cat1 (second= cat1 (third= cat1 )? )? L2LM
             {
+            dbg.location(37,13);
             pushFollow(FOLLOW_cat1_in_cat2269);
             first=cat1();
 
             state._fsp--;
 
             stream_cat1.add(first.getTree());
+            dbg.location(37,19);
             // /eclipse/workspace/imelpreter/src/ieml.g:37:19: (second= cat1 (third= cat1 )? )?
             int alt7=2;
+            try { dbg.enterSubRule(7);
+            try { dbg.enterDecision(7);
+
             int LA7_0 = input.LA(1);
 
             if ( (LA7_0==PRIMITIVE||LA7_0==EVENT) ) {
                 alt7=1;
             }
+            } finally {dbg.exitDecision(7);}
+
             switch (alt7) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:37:20: second= cat1 (third= cat1 )?
                     {
+                    dbg.location(37,26);
                     pushFollow(FOLLOW_cat1_in_cat2274);
                     second=cat1();
 
                     state._fsp--;
 
                     stream_cat1.add(second.getTree());
+                    dbg.location(37,37);
                     // /eclipse/workspace/imelpreter/src/ieml.g:37:37: (third= cat1 )?
                     int alt6=2;
+                    try { dbg.enterSubRule(6);
+                    try { dbg.enterDecision(6);
+
                     int LA6_0 = input.LA(1);
 
                     if ( (LA6_0==PRIMITIVE||LA6_0==EVENT) ) {
                         alt6=1;
                     }
+                    } finally {dbg.exitDecision(6);}
+
                     switch (alt6) {
                         case 1 :
+                            dbg.enterAlt(1);
+
                             // /eclipse/workspace/imelpreter/src/ieml.g:37:37: third= cat1
                             {
+                            dbg.location(37,37);
                             pushFollow(FOLLOW_cat1_in_cat2278);
                             third=cat1();
 
@@ -860,20 +1130,23 @@ public class iemlParser extends Parser {
                             break;
 
                     }
+                    } finally {dbg.exitSubRule(6);}
 
 
                     }
                     break;
 
             }
+            } finally {dbg.exitSubRule(7);}
 
+            dbg.location(37,46);
             L2LM18=(Token)match(input,L2LM,FOLLOW_L2LM_in_cat2283);  
             stream_L2LM.add(L2LM18);
 
 
 
             // AST REWRITE
-            // elements: second, first, third
+            // elements: second, third, first
             // token labels: 
             // rule labels: first, retval, third, second
             // token list labels: 
@@ -888,20 +1161,27 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 37:51: -> ^( CAT2 $first ( $second)? ( $third)? )
             {
+                dbg.location(37,54);
                 // /eclipse/workspace/imelpreter/src/ieml.g:37:54: ^( CAT2 $first ( $second)? ( $third)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(37,56);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CAT2, "CAT2"), root_1);
 
+                dbg.location(37,61);
                 adaptor.addChild(root_1, stream_first.nextTree());
+                dbg.location(37,68);
                 // /eclipse/workspace/imelpreter/src/ieml.g:37:68: ( $second)?
                 if ( stream_second.hasNext() ) {
+                    dbg.location(37,68);
                     adaptor.addChild(root_1, stream_second.nextTree());
 
                 }
                 stream_second.reset();
+                dbg.location(37,77);
                 // /eclipse/workspace/imelpreter/src/ieml.g:37:77: ( $third)?
                 if ( stream_third.hasNext() ) {
+                    dbg.location(37,77);
                     adaptor.addChild(root_1, stream_third.nextTree());
 
                 }
@@ -929,6 +1209,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(37, 85);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "cat2");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "cat2"
@@ -957,44 +1246,70 @@ public class iemlParser extends Parser {
         CommonTree L3LM19_tree=null;
         RewriteRuleTokenStream stream_L3LM=new RewriteRuleTokenStream(adaptor,"token L3LM");
         RewriteRuleSubtreeStream stream_cat2=new RewriteRuleSubtreeStream(adaptor,"rule cat2");
+        try { dbg.enterRule(getGrammarFileName(), "cat3");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(38, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:38:6: (first= cat2 (second= cat2 (third= cat2 )? )? L3LM -> ^( CAT3 $first ( $second)? ( $third)? ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:38:8: first= cat2 (second= cat2 (third= cat2 )? )? L3LM
             {
+            dbg.location(38,13);
             pushFollow(FOLLOW_cat2_in_cat3309);
             first=cat2();
 
             state._fsp--;
 
             stream_cat2.add(first.getTree());
+            dbg.location(38,19);
             // /eclipse/workspace/imelpreter/src/ieml.g:38:19: (second= cat2 (third= cat2 )? )?
             int alt9=2;
+            try { dbg.enterSubRule(9);
+            try { dbg.enterDecision(9);
+
             int LA9_0 = input.LA(1);
 
             if ( (LA9_0==PRIMITIVE||LA9_0==EVENT) ) {
                 alt9=1;
             }
+            } finally {dbg.exitDecision(9);}
+
             switch (alt9) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:38:20: second= cat2 (third= cat2 )?
                     {
+                    dbg.location(38,26);
                     pushFollow(FOLLOW_cat2_in_cat3314);
                     second=cat2();
 
                     state._fsp--;
 
                     stream_cat2.add(second.getTree());
+                    dbg.location(38,37);
                     // /eclipse/workspace/imelpreter/src/ieml.g:38:37: (third= cat2 )?
                     int alt8=2;
+                    try { dbg.enterSubRule(8);
+                    try { dbg.enterDecision(8);
+
                     int LA8_0 = input.LA(1);
 
                     if ( (LA8_0==PRIMITIVE||LA8_0==EVENT) ) {
                         alt8=1;
                     }
+                    } finally {dbg.exitDecision(8);}
+
                     switch (alt8) {
                         case 1 :
+                            dbg.enterAlt(1);
+
                             // /eclipse/workspace/imelpreter/src/ieml.g:38:37: third= cat2
                             {
+                            dbg.location(38,37);
                             pushFollow(FOLLOW_cat2_in_cat3318);
                             third=cat2();
 
@@ -1006,20 +1321,23 @@ public class iemlParser extends Parser {
                             break;
 
                     }
+                    } finally {dbg.exitSubRule(8);}
 
 
                     }
                     break;
 
             }
+            } finally {dbg.exitSubRule(9);}
 
+            dbg.location(38,46);
             L3LM19=(Token)match(input,L3LM,FOLLOW_L3LM_in_cat3323);  
             stream_L3LM.add(L3LM19);
 
 
 
             // AST REWRITE
-            // elements: first, third, second
+            // elements: first, second, third
             // token labels: 
             // rule labels: first, retval, third, second
             // token list labels: 
@@ -1034,20 +1352,27 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 38:51: -> ^( CAT3 $first ( $second)? ( $third)? )
             {
+                dbg.location(38,54);
                 // /eclipse/workspace/imelpreter/src/ieml.g:38:54: ^( CAT3 $first ( $second)? ( $third)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(38,56);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CAT3, "CAT3"), root_1);
 
+                dbg.location(38,61);
                 adaptor.addChild(root_1, stream_first.nextTree());
+                dbg.location(38,68);
                 // /eclipse/workspace/imelpreter/src/ieml.g:38:68: ( $second)?
                 if ( stream_second.hasNext() ) {
+                    dbg.location(38,68);
                     adaptor.addChild(root_1, stream_second.nextTree());
 
                 }
                 stream_second.reset();
+                dbg.location(38,77);
                 // /eclipse/workspace/imelpreter/src/ieml.g:38:77: ( $third)?
                 if ( stream_third.hasNext() ) {
+                    dbg.location(38,77);
                     adaptor.addChild(root_1, stream_third.nextTree());
 
                 }
@@ -1075,6 +1400,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(38, 85);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "cat3");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "cat3"
@@ -1103,44 +1437,70 @@ public class iemlParser extends Parser {
         CommonTree L4LM20_tree=null;
         RewriteRuleTokenStream stream_L4LM=new RewriteRuleTokenStream(adaptor,"token L4LM");
         RewriteRuleSubtreeStream stream_cat3=new RewriteRuleSubtreeStream(adaptor,"rule cat3");
+        try { dbg.enterRule(getGrammarFileName(), "cat4");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(39, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:39:6: (first= cat3 (second= cat3 (third= cat3 )? )? L4LM -> ^( CAT4 $first ( $second)? ( $third)? ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:39:8: first= cat3 (second= cat3 (third= cat3 )? )? L4LM
             {
+            dbg.location(39,13);
             pushFollow(FOLLOW_cat3_in_cat4349);
             first=cat3();
 
             state._fsp--;
 
             stream_cat3.add(first.getTree());
+            dbg.location(39,19);
             // /eclipse/workspace/imelpreter/src/ieml.g:39:19: (second= cat3 (third= cat3 )? )?
             int alt11=2;
+            try { dbg.enterSubRule(11);
+            try { dbg.enterDecision(11);
+
             int LA11_0 = input.LA(1);
 
             if ( (LA11_0==PRIMITIVE||LA11_0==EVENT) ) {
                 alt11=1;
             }
+            } finally {dbg.exitDecision(11);}
+
             switch (alt11) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:39:20: second= cat3 (third= cat3 )?
                     {
+                    dbg.location(39,26);
                     pushFollow(FOLLOW_cat3_in_cat4354);
                     second=cat3();
 
                     state._fsp--;
 
                     stream_cat3.add(second.getTree());
+                    dbg.location(39,37);
                     // /eclipse/workspace/imelpreter/src/ieml.g:39:37: (third= cat3 )?
                     int alt10=2;
+                    try { dbg.enterSubRule(10);
+                    try { dbg.enterDecision(10);
+
                     int LA10_0 = input.LA(1);
 
                     if ( (LA10_0==PRIMITIVE||LA10_0==EVENT) ) {
                         alt10=1;
                     }
+                    } finally {dbg.exitDecision(10);}
+
                     switch (alt10) {
                         case 1 :
+                            dbg.enterAlt(1);
+
                             // /eclipse/workspace/imelpreter/src/ieml.g:39:37: third= cat3
                             {
+                            dbg.location(39,37);
                             pushFollow(FOLLOW_cat3_in_cat4358);
                             third=cat3();
 
@@ -1152,20 +1512,23 @@ public class iemlParser extends Parser {
                             break;
 
                     }
+                    } finally {dbg.exitSubRule(10);}
 
 
                     }
                     break;
 
             }
+            } finally {dbg.exitSubRule(11);}
 
+            dbg.location(39,46);
             L4LM20=(Token)match(input,L4LM,FOLLOW_L4LM_in_cat4363);  
             stream_L4LM.add(L4LM20);
 
 
 
             // AST REWRITE
-            // elements: third, second, first
+            // elements: second, third, first
             // token labels: 
             // rule labels: first, retval, third, second
             // token list labels: 
@@ -1180,20 +1543,27 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 39:51: -> ^( CAT4 $first ( $second)? ( $third)? )
             {
+                dbg.location(39,54);
                 // /eclipse/workspace/imelpreter/src/ieml.g:39:54: ^( CAT4 $first ( $second)? ( $third)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(39,56);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CAT4, "CAT4"), root_1);
 
+                dbg.location(39,61);
                 adaptor.addChild(root_1, stream_first.nextTree());
+                dbg.location(39,68);
                 // /eclipse/workspace/imelpreter/src/ieml.g:39:68: ( $second)?
                 if ( stream_second.hasNext() ) {
+                    dbg.location(39,68);
                     adaptor.addChild(root_1, stream_second.nextTree());
 
                 }
                 stream_second.reset();
+                dbg.location(39,77);
                 // /eclipse/workspace/imelpreter/src/ieml.g:39:77: ( $third)?
                 if ( stream_third.hasNext() ) {
+                    dbg.location(39,77);
                     adaptor.addChild(root_1, stream_third.nextTree());
 
                 }
@@ -1221,6 +1591,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(39, 85);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "cat4");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "cat4"
@@ -1249,44 +1628,70 @@ public class iemlParser extends Parser {
         CommonTree L5LM21_tree=null;
         RewriteRuleTokenStream stream_L5LM=new RewriteRuleTokenStream(adaptor,"token L5LM");
         RewriteRuleSubtreeStream stream_cat4=new RewriteRuleSubtreeStream(adaptor,"rule cat4");
+        try { dbg.enterRule(getGrammarFileName(), "cat5");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(40, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:40:6: (first= cat4 (second= cat4 (third= cat4 )? )? L5LM -> ^( CAT5 $first ( $second)? ( $third)? ) )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:40:8: first= cat4 (second= cat4 (third= cat4 )? )? L5LM
             {
+            dbg.location(40,13);
             pushFollow(FOLLOW_cat4_in_cat5389);
             first=cat4();
 
             state._fsp--;
 
             stream_cat4.add(first.getTree());
+            dbg.location(40,19);
             // /eclipse/workspace/imelpreter/src/ieml.g:40:19: (second= cat4 (third= cat4 )? )?
             int alt13=2;
+            try { dbg.enterSubRule(13);
+            try { dbg.enterDecision(13);
+
             int LA13_0 = input.LA(1);
 
             if ( (LA13_0==PRIMITIVE||LA13_0==EVENT) ) {
                 alt13=1;
             }
+            } finally {dbg.exitDecision(13);}
+
             switch (alt13) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /eclipse/workspace/imelpreter/src/ieml.g:40:20: second= cat4 (third= cat4 )?
                     {
+                    dbg.location(40,26);
                     pushFollow(FOLLOW_cat4_in_cat5394);
                     second=cat4();
 
                     state._fsp--;
 
                     stream_cat4.add(second.getTree());
+                    dbg.location(40,37);
                     // /eclipse/workspace/imelpreter/src/ieml.g:40:37: (third= cat4 )?
                     int alt12=2;
+                    try { dbg.enterSubRule(12);
+                    try { dbg.enterDecision(12);
+
                     int LA12_0 = input.LA(1);
 
                     if ( (LA12_0==PRIMITIVE||LA12_0==EVENT) ) {
                         alt12=1;
                     }
+                    } finally {dbg.exitDecision(12);}
+
                     switch (alt12) {
                         case 1 :
+                            dbg.enterAlt(1);
+
                             // /eclipse/workspace/imelpreter/src/ieml.g:40:37: third= cat4
                             {
+                            dbg.location(40,37);
                             pushFollow(FOLLOW_cat4_in_cat5398);
                             third=cat4();
 
@@ -1298,20 +1703,23 @@ public class iemlParser extends Parser {
                             break;
 
                     }
+                    } finally {dbg.exitSubRule(12);}
 
 
                     }
                     break;
 
             }
+            } finally {dbg.exitSubRule(13);}
 
+            dbg.location(40,46);
             L5LM21=(Token)match(input,L5LM,FOLLOW_L5LM_in_cat5403);  
             stream_L5LM.add(L5LM21);
 
 
 
             // AST REWRITE
-            // elements: first, third, second
+            // elements: third, second, first
             // token labels: 
             // rule labels: first, retval, third, second
             // token list labels: 
@@ -1326,20 +1734,27 @@ public class iemlParser extends Parser {
             root_0 = (CommonTree)adaptor.nil();
             // 40:51: -> ^( CAT5 $first ( $second)? ( $third)? )
             {
+                dbg.location(40,54);
                 // /eclipse/workspace/imelpreter/src/ieml.g:40:54: ^( CAT5 $first ( $second)? ( $third)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
+                dbg.location(40,56);
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CAT5, "CAT5"), root_1);
 
+                dbg.location(40,61);
                 adaptor.addChild(root_1, stream_first.nextTree());
+                dbg.location(40,68);
                 // /eclipse/workspace/imelpreter/src/ieml.g:40:68: ( $second)?
                 if ( stream_second.hasNext() ) {
+                    dbg.location(40,68);
                     adaptor.addChild(root_1, stream_second.nextTree());
 
                 }
                 stream_second.reset();
+                dbg.location(40,77);
                 // /eclipse/workspace/imelpreter/src/ieml.g:40:77: ( $third)?
                 if ( stream_third.hasNext() ) {
+                    dbg.location(40,77);
                     adaptor.addChild(root_1, stream_third.nextTree());
 
                 }
@@ -1367,6 +1782,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(40, 85);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "cat5");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "cat5"
@@ -1388,12 +1812,20 @@ public class iemlParser extends Parser {
 
         CommonTree POR22_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "pop");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(42, 1);
+
         try {
             // /eclipse/workspace/imelpreter/src/ieml.g:42:5: ( POR )
+            dbg.enterAlt(1);
+
             // /eclipse/workspace/imelpreter/src/ieml.g:42:7: POR
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(42,7);
             POR22=(Token)match(input,POR,FOLLOW_POR_in_pop428); 
             POR22_tree = (CommonTree)adaptor.create(POR22);
             adaptor.addChild(root_0, POR22_tree);
@@ -1415,6 +1847,15 @@ public class iemlParser extends Parser {
         }
         finally {
         }
+        dbg.location(42, 10);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "pop");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "pop"
@@ -1729,6 +2170,9 @@ public class iemlParser extends Parser {
         }
         public String getDescription() {
             return "33:1: expr : ( cat0 | cat1 | cat2 | cat3 | cat4 | cat5 );";
+        }
+        public void error(NoViableAltException nvae) {
+            dbg.recognitionException(nvae);
         }
     }
  
