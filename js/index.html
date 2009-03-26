@@ -47,7 +47,7 @@
 					+ " (expected: " + expected + ")",
 					result);
 		}
-
+	
 		// invokes the parser
 		function parseStar(expr) {
 		    cstream = new org.antlr.runtime.ANTLRStringStream(expr),
@@ -72,7 +72,38 @@
 			assert(star2.toString() + " is of layer 4 (was " + star2.layer + ")", star2.layer==4);
 			assert(star3.toString() + " is of layer 0 (was " + star3.layer + ")", star3.layer==0);
 		}
+
+		// semanticstructures.pdf, p5, 2.2.1.1, example 1
+		function testPowerset1() {
+			var starExp = "*M:**";
+			var cat = parseStar(starExp);
+			var ps = pow(fold(cat));
+			if (console) console.log("The power set of " + starExp + " is " + ps.toString());
+			assert("wrong number of members: " + ps.members.length + " (expected 7)", ps.members.length==7);
+		}
 		
+		// semanticstructures.pdf, p5, 2.2.1.1, example 2
+		function testPowerset2() {
+			var starExp = "*U:M:.**";
+			var cat = parseStar(starExp);
+			var ps = pow(fold(cat));
+			if (console) console.log("The power set of " + starExp + " is " + ps.toString());
+			assert("wrong number of members: " + ps.members.length + " (expected 7)", ps.members.length==7);
+		}
+
+		function notestCProd() {
+			var prod = cprod([["a","b","c"],["1","2"],["A", "B", "C"], ["aa","bb","cc","dd","dd"]]);
+			if (console) console.log(prod);
+			assert("not the expected number of elements in cartesian product result", prod.length==(18*5));
+		}
+
+		function notestCurlyBraces() {
+			var aarray = [["a","b","c"],["1","2"],["A", "B", "C"], ["aa","bb","cc","dd","dd"]];
+			var prod = toCurlyBraces(aarray);
+			if (console) console.log(prod);
+		}
+		
+//		window.onload = function() { testPowerset2() };
 	</script>
 </head>
 <body>

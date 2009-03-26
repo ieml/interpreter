@@ -3,6 +3,7 @@ grammar ieml;
 options {
 	output=AST;
 	ASTLabelType=CommonTree;
+	
 }
 
 tokens {
@@ -11,12 +12,12 @@ tokens {
 	PRINTSTAT; XMLSTAT;
 	FUNCTION;
 	CAT0;CAT1;CAT2;CAT3;CAT4;CAT5;
+	PRIM;
 }
 
 @header {
 package org.ieml;
-import java.util.HashMap;
-}
+}	
 
 @lexer::header { package org.ieml; }
 
@@ -32,8 +33,7 @@ starexpr:	STAR category=expr STAR STAR -> ^(EXPRESSION $category);
 
 expr	:	cat0 | cat1 | cat2 | cat3 | cat4 | cat5;
 
-prim	:	PRIMITIVE L0LM!;
-cat0	:	prim | LPAREN prim (pop prim)* RPAREN;
+cat0	:	PRIMITIVE L0LM -> ^(CAT0 PRIMITIVE);
 cat1	:	((first=cat0 (second=cat0 third=cat0?)?) | EVENT) L1LM -> ^(CAT1 $first? $second? $third? EVENT?);
 cat2	:	first=cat1 (second=cat1 third=cat1?)? L2LM -> ^(CAT2 $first $second? $third?);
 cat3	:	first=cat2 (second=cat2 third=cat2?)? L3LM -> ^(CAT3 $first $second? $third?);
